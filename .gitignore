@@ -188,3 +188,8 @@ involucro
 .DS_Store
 *.rej
 *~
+
+# Syncthing
+.stignore
+.stfolder
+.stversions

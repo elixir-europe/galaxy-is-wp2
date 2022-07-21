@@ -1,0 +1,60 @@
+.hg*
+
+# Downloaded and locally built eggs
+eggs
+scripts/scramble/build
+scripts/scramble/lib
+scripts/scramble/archives
+
+# Python virtualenv
+.venv
+.venv3
+
+# Python build artifacts
+build
+dist
+lib/galaxy.egg-info
+.eggs
+
+# Database stuff
+database
+# Python bytecode
+**.pyc
+
+# Galaxy Runtime Files
+**.lock
+**.log
+**.pid
+# Config files
+config/plugins
+
+# Tool data.
+tool-data
+# Project files
+*.kpf
+.idea
+.vscode
+client/**/jsconfig.json
+vetur.config.js
+
+# Chrom len files
+**.len
+
+# Node modules
+node_modules
+
+# Documentation build files.
+doc
+dist
+
+# webpack stats
+client/webpack-stats.json
+
+# Misc
+**.orig
+.DS_Store
+**.rej
+**~
+
+# Git
+.git
