@@ -64,12 +64,21 @@
                 <b-button v-if="showRerun" class="px-1" title="Help" size="sm" variant="link" @click.stop="onRerun">
                     <span class="fa fa-question" />
                 </b-button>
+                <b-button
+                    class="px-1"
+                    title="Re-encrypt Crypt4GH header"
+                    size="sm"
+                    variant="link"
+                    @click.stop="onReEncrypt">
+                    <span class="fas fa-key" />
+                </b-button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import axios from "axios";
 import { copy as sendToClipboard } from "utils/clipboard";
 import { absPath, prependPath } from "@/utils/redirect";
 import { downloadUrlMixin } from "./mixins.js";
@@ -144,6 +153,16 @@ export default {
         },
         onHighlight() {
             this.$emit("toggleHighlights");
+        },
+        onReEncrypt() {
+            axios.post('http://localhost:8000/reencrypt_header',
+              {
+                encrypted_header: `My encrypted header for dataset ${this.item.name}`,
+                reencrypt_public_key: 'Compute public key'
+              }).then((response) => {alert(response.data)})
+                .catch((e) => {
+                    console.error(e);
+                });
         },
     },
 };
