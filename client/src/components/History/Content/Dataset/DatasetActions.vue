@@ -1,80 +1,80 @@
 <template>
-    <div class="dataset-actions mb-1">
-        <div class="clearfix">
-            <div class="btn-group float-left">
-                <b-button
-                    v-if="showError"
-                    class="px-1"
-                    title="Error"
-                    size="sm"
-                    variant="link"
-                    :href="reportErrorUrl"
-                    @click.prevent.stop="onError">
-                    <span class="fa fa-bug" />
-                </b-button>
-                <dataset-download v-if="showDownloads" :item="item" @on-download="onDownload" />
-                <b-button
-                    v-if="showDownloads"
-                    class="px-1"
-                    title="Copy Link"
-                    size="sm"
-                    variant="link"
-                    @click.stop="onCopyLink">
-                    <span class="fa fa-link" />
-                </b-button>
-                <b-button
-                    v-if="showInfo"
-                    class="params-btn px-1"
-                    title="Dataset Details"
-                    size="sm"
-                    variant="link"
-                    :href="showDetailsUrl"
-                    @click.prevent.stop="onInfo">
-                    <span class="fa fa-info-circle" />
-                </b-button>
-                <b-button
-                    v-if="writable && showRerun"
-                    class="rerun-btn px-1"
-                    title="Run Job Again"
-                    size="sm"
-                    variant="link"
-                    :href="rerunUrl"
-                    @click.prevent.stop="onRerun">
-                    <span class="fa fa-redo" />
-                </b-button>
-                <b-button
-                    v-if="showVisualizations"
-                    class="visualize-btn px-1"
-                    title="Visualize"
-                    size="sm"
-                    variant="link"
-                    :href="visualizeUrl"
-                    @click.prevent.stop="onVisualize">
-                    <span class="fa fa-bar-chart-o" />
-                </b-button>
-                <b-button
-                    v-if="showHighlight"
-                    class="highlight-btn px-1"
-                    title="Show Inputs for this item"
-                    size="sm"
-                    variant="link"
-                    @click.stop="onHighlight">
-                    <span class="fa fa-sitemap" />
-                </b-button>
-                <b-button v-if="showRerun" class="px-1" title="Help" size="sm" variant="link" @click.stop="onRerun">
-                    <span class="fa fa-question" />
-                </b-button>
-                <b-button
-                    class="px-1"
-                    title="Re-encrypt Crypt4GH header"
-                    size="sm"
-                    variant="link"
-                    @click.stop="onReEncrypt">
-                    <span class="fas fa-key" />
-                </b-button>
-            </div>
-        </div>
+  <div class="dataset-actions mb-1">
+    <div class="clearfix">
+      <div class="btn-group float-left">
+        <b-button
+            v-if="showError"
+            class="px-1"
+            title="Error"
+            size="sm"
+            variant="link"
+            :href="reportErrorUrl"
+            @click.prevent.stop="onError">
+          <span class="fa fa-bug"/>
+        </b-button>
+        <dataset-download v-if="showDownloads" :item="item" @on-download="onDownload"/>
+        <b-button
+            v-if="showDownloads"
+            class="px-1"
+            title="Copy Link"
+            size="sm"
+            variant="link"
+            @click.stop="onCopyLink">
+          <span class="fa fa-link"/>
+        </b-button>
+        <b-button
+            v-if="showInfo"
+            class="params-btn px-1"
+            title="Dataset Details"
+            size="sm"
+            variant="link"
+            :href="showDetailsUrl"
+            @click.prevent.stop="onInfo">
+          <span class="fa fa-info-circle"/>
+        </b-button>
+        <b-button
+            v-if="writable && showRerun"
+            class="rerun-btn px-1"
+            title="Run Job Again"
+            size="sm"
+            variant="link"
+            :href="rerunUrl"
+            @click.prevent.stop="onRerun">
+          <span class="fa fa-redo"/>
+        </b-button>
+        <b-button
+            v-if="showVisualizations"
+            class="visualize-btn px-1"
+            title="Visualize"
+            size="sm"
+            variant="link"
+            :href="visualizeUrl"
+            @click.prevent.stop="onVisualize">
+          <span class="fa fa-bar-chart-o"/>
+        </b-button>
+        <b-button
+            v-if="showHighlight"
+            class="highlight-btn px-1"
+            title="Show Inputs for this item"
+            size="sm"
+            variant="link"
+            @click.stop="onHighlight">
+          <span class="fa fa-sitemap"/>
+        </b-button>
+        <b-button v-if="showRerun" class="px-1" title="Help" size="sm" variant="link" @click.stop="onRerun">
+          <span class="fa fa-question"/>
+        </b-button>
+        <b-button
+            class="px-1"
+            title="Re-encrypt Crypt4GH header"
+            size="sm"
+            variant="link"
+            @click.stop="onReEncrypt">
+          <span class="fas fa-key"/>
+        </b-button>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -155,14 +155,24 @@ export default {
             this.$emit("toggleHighlights");
         },
         onReEncrypt() {
+          axios.get(
+              `${getAppRoot()}api/datasets/${this.item.id}/display?preview=false`
+          ).then((response) => {
             axios.post('http://localhost:8000/reencrypt_header',
-              {
-                encrypted_header: `My encrypted header for dataset ${this.item.name}`,
-                reencrypt_public_key: 'Compute public key'
-              }).then((response) => {alert(response.data)})
+                {
+                  encrypted_header: response.data,
+                  reencrypt_public_key: 'Compute public key'
+                }).then((response) => {
+              console.log(response.data)
+            })
                 .catch((e) => {
-                    console.error(e);
+                  console.error(e);
                 });
+          })
+              .catch((e) => {
+                console.error(e);
+              });
+
         },
     },
 };
