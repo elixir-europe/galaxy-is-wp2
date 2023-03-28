@@ -58,3 +58,6 @@ client/webpack-stats.json
 
 # Git
 .git
+
+# Galaxy config
+config
