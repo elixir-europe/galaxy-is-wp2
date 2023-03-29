@@ -83,7 +83,7 @@ import { copy as sendToClipboard } from "utils/clipboard";
 import { absPath, prependPath } from "@/utils/redirect";
 import { downloadUrlMixin } from "./mixins.js";
 import DatasetDownload from "./DatasetDownload";
-
+import { getAppRoot } from "@/onload/loadConfig";
 export default {
     components: {
         DatasetDownload,
