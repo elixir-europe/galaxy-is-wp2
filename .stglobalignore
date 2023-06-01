@@ -61,3 +61,5 @@ client/webpack-stats.json
 
 # Galaxy config
 config
+database
+client/dist
