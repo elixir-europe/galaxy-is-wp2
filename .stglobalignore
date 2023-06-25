@@ -9,6 +9,7 @@ scripts/scramble/archives
 # Python virtualenv
 .venv
 .venv3
+venv
 
 # Python build artifacts
 build
@@ -17,7 +18,7 @@ lib/galaxy.egg-info
 .eggs
 
 # Database stuff
-database
+/database
 # Python bytecode
 **.pyc
 
@@ -26,10 +27,11 @@ database
 **.log
 **.pid
 # Config files
-config/plugins
+/config/plugins
 
 # Tool data.
-tool-data
+/tool-data
+
 # Project files
 *.kpf
 .idea
@@ -44,11 +46,10 @@ vetur.config.js
 node_modules
 
 # Documentation build files.
-doc
-dist
+/doc
 
 # webpack stats
-client/webpack-stats.json
+/client/webpack-stats.json
 
 # Misc
 **.orig
@@ -59,7 +60,9 @@ client/webpack-stats.json
 # Git
 .git
 
-# Galaxy config
-config
-database
-client/dist
+# Full config dict
+/config
+
+# Syncthing
+.stversions
+.syncthing*
