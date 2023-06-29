@@ -1,80 +1,80 @@
 <template>
-  <div class="dataset-actions mb-1">
-    <div class="clearfix">
-      <div class="btn-group float-left">
-        <b-button
-            v-if="showError"
-            class="px-1"
-            title="Error"
-            size="sm"
-            variant="link"
-            :href="reportErrorUrl"
-            @click.prevent.stop="onError">
-          <span class="fa fa-bug"/>
-        </b-button>
-        <dataset-download v-if="showDownloads" :item="item" @on-download="onDownload"/>
-        <b-button
-            v-if="showDownloads"
-            class="px-1"
-            title="Copy Link"
-            size="sm"
-            variant="link"
-            @click.stop="onCopyLink">
-          <span class="fa fa-link"/>
-        </b-button>
-        <b-button
-            v-if="showInfo"
-            class="params-btn px-1"
-            title="Dataset Details"
-            size="sm"
-            variant="link"
-            :href="showDetailsUrl"
-            @click.prevent.stop="onInfo">
-          <span class="fa fa-info-circle"/>
-        </b-button>
-        <b-button
-            v-if="writable && showRerun"
-            class="rerun-btn px-1"
-            title="Run Job Again"
-            size="sm"
-            variant="link"
-            :href="rerunUrl"
-            @click.prevent.stop="onRerun">
-          <span class="fa fa-redo"/>
-        </b-button>
-        <b-button
-            v-if="showVisualizations"
-            class="visualize-btn px-1"
-            title="Visualize"
-            size="sm"
-            variant="link"
-            :href="visualizeUrl"
-            @click.prevent.stop="onVisualize">
-          <span class="fa fa-bar-chart-o"/>
-        </b-button>
-        <b-button
-            v-if="showHighlight"
-            class="highlight-btn px-1"
-            title="Show Related Items"
-            size="sm"
-            variant="link"
-            @click.stop="onHighlight">
-          <span class="fa fa-sitemap"/>
-        </b-button>
-        <b-button v-if="showRerun" class="px-1" title="Help" size="sm" variant="link" @click.stop="onRerun">
-          <span class="fa fa-question"/>
-        </b-button>
-        <b-button
-            class="px-1"
-            title="Re-encrypt Crypt4GH header"
-            size="sm"
-            variant="link"
-            @click.stop="onReEncrypt">
-          <span class="fas fa-key"/>
-        </b-button>
-      </div>
+    <div class="dataset-actions mb-1">
+        <div class="clearfix">
+            <div class="btn-group float-left">
+                <b-button
+                    v-if="showError"
+                    class="px-1"
+                    title="Error"
+                    size="sm"
+                    variant="link"
+                    :href="reportErrorUrl"
+                    @click.prevent.stop="onError">
+                    <span class="fa fa-bug" />
+                </b-button>
+                <dataset-download v-if="showDownloads" :item="item" @on-download="onDownload" />
+                <b-button
+                    v-if="showDownloads"
+                    class="px-1"
+                    title="Copy Link"
+                    size="sm"
+                    variant="link"
+                    @click.stop="onCopyLink">
+                    <span class="fa fa-link" />
+                </b-button>
+                <b-button
+                    v-if="showInfo"
+                    class="params-btn px-1"
+                    title="Dataset Details"
+                    size="sm"
+                    variant="link"
+                    :href="showDetailsUrl"
+                    @click.prevent.stop="onInfo">
+                    <span class="fa fa-info-circle" />
+                </b-button>
+                <b-button
+                    v-if="writable && showRerun"
+                    class="rerun-btn px-1"
+                    title="Run Job Again"
+                    size="sm"
+                    variant="link"
+                    :href="rerunUrl"
+                    @click.prevent.stop="onRerun">
+                    <span class="fa fa-redo" />
+                </b-button>
+                <b-button
+                    v-if="showVisualizations"
+                    class="visualize-btn px-1"
+                    title="Visualize"
+                    size="sm"
+                    variant="link"
+                    :href="visualizeUrl"
+                    @click.prevent.stop="onVisualize">
+                    <span class="fa fa-bar-chart-o" />
+                </b-button>
+                <b-button
+                    v-if="showHighlight"
+                    class="highlight-btn px-1"
+                    title="Show Related Items"
+                    size="sm"
+                    variant="link"
+                    @click.stop="onHighlight">
+                    <span class="fa fa-sitemap" />
+                </b-button>
+                <b-button v-if="showRerun" class="px-1" title="Help" size="sm" variant="link" @click.stop="onRerun">
+                    <span class="fa fa-question" />
+                </b-button>
+                <b-button
+                    class="px-1"
+                    title="Re-encrypt Crypt4GH header"
+                    size="sm"
+                    variant="link"
+                    @click.stop="onReEncrypt">
+                    <span class="fas fa-key" />
+                </b-button>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -84,6 +84,7 @@ import { absPath, prependPath } from "@/utils/redirect";
 import { downloadUrlMixin } from "./mixins.js";
 import DatasetDownload from "./DatasetDownload";
 import { getAppRoot } from "@/onload/loadConfig";
+
 export default {
     components: {
         DatasetDownload,
