@@ -154,25 +154,35 @@ export default {
         onHighlight() {
             this.$emit("toggleHighlights");
         },
-        onReEncrypt() {
-          axios.get(
-              `${getAppRoot()}api/datasets/${this.item.id}/display?preview=false`
-          ).then((response) => {
-            axios.post('http://localhost:8000/reencrypt_header',
-                {
-                  encrypted_header: response.data,
-                  reencrypt_public_key: 'Compute public key'
-                }).then((response) => {
-              console.log(response.data)
-            })
-                .catch((e) => {
-                  console.error(e);
+        async onReEncrypt() {
+            try {
+                let data_response = await axios.get(
+                    `${getAppRoot()}api/datasets/${this.item.id}/display?preview=false`
+                );
+                let reencrypt_response = await axios.post("https://localhost:61357/reencrypt_header", {
+                    encrypted_header: data_response.data,
+                    reencrypt_public_key: "Compute public key",
                 });
-          })
-              .catch((e) => {
-                console.error(e);
-              });
 
+                let payload = {
+                    history_id: this.item.history_id,
+                    tool_id: "upload1",
+                    inputs: {
+                        file_type: this.item.file_type,
+                        dbkey: this.item.dbkey,
+                        "files_0|type": "upload_dataset",
+                        "files_0|to_posix_lines": false,
+                        "files_0|NAME": `Re-encrypted Crypt4GH header of data ${this.item.hid}`,
+                        "files_0|url_paste": reencrypt_response.data,
+                    },
+                };
+
+                let upload_response = await axios.post(`${getAppRoot()}api/tools/`, payload);
+                console.log(this.item);
+                // console.log(upload_response);
+            } catch (e) {
+                console.error(e.toJSON());
+            }
         },
     },
 };
