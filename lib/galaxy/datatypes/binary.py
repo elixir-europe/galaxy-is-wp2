@@ -439,9 +439,11 @@ class CompressedZipArchive(CompressedArchive):
         return False
 
 
-class Crypt4ghEncryptedArchive(CompressedArchive):
+class Crypt4ghEncryptedArchive(Binary):
     file_ext = "c4gh"
     check_required_metadata = True
+
+    CRYPT4GH_MAGIC_NUMBER_AND_VERSION = b'crypt4gh' + int.to_bytes(1, length=4, byteorder='little')
 
     MetadataElement(
         name="crypt4gh_header",
@@ -505,39 +507,18 @@ class Crypt4ghEncryptedArchive(CompressedArchive):
         except Exception:
             return f"Crypt4GH encrypted dataset ({nice_size(dataset.get_size())})"
 
-    def _has_crypt4gh_magic_number_and_version(self, prefix_bytes: bytes) -> bool:
-        try:
-            if len(prefix_bytes) >= 12:
-                magic_number = prefix_bytes[0:8]
-                version = int.from_bytes(prefix_bytes[8:12], byteorder='little')
-                return magic_number.decode() == 'crypt4gh' and version == 1
-        except Exception as exc:
-            log.warning("%s, _has_crypt4gh_magic_number_and_version Exception: %s", self, exc)
-        return False
+    def sniff_prefix(self, file_prefix: FilePrefix) -> bool:
+        starts_with_magic_number_and_version = file_prefix.startswith_bytes(self.CRYPT4GH_MAGIC_NUMBER_AND_VERSION)
+        if not starts_with_magic_number_and_version:
+            return False
 
-    def sniff(self, filename: str) -> bool:
-        with open(filename, 'rb') as f:
-            prefix_bytes = f.read(12)
-            return self._has_crypt4gh_magic_number_and_version(prefix_bytes)
+        file_stream = io.BytesIO(file_prefix.contents_header_bytes)
+        header = self._read_and_validate_crypt4gh_header(file_stream)
+        has_crypt4gh_data = self._has_encrypted_data(header, file_prefix.file_size)
 
-        return False
+        file_stream.close()
 
-    def _read_and_validate_crypt4gh_header(self, stream) -> bytes:
-        header = b''
-
-        prefix_bytes = stream.read(16)
-        if not self._has_crypt4gh_magic_number_and_version(prefix_bytes[0:12]):
-            raise ValueError('Unable to read Crypt4GH header. Not a Crypt4GH dataset')
-        header += prefix_bytes
-
-        header_packet_count = int.from_bytes(prefix_bytes[12:16], byteorder='little')
-        for i in range(header_packet_count):
-            packet_length = int.from_bytes(stream.read(4), byteorder='little')
-            stream.seek(-4, os.SEEK_CUR)
-            packet_bytes = stream.read(packet_length)
-            header += packet_bytes
-
-        return header
+        return has_crypt4gh_data
 
     def set_meta(self, dataset: DatasetProtocol, overwrite: bool = True,
                  crypt4gh_header: Optional[bytes] = None,
@@ -565,13 +546,36 @@ class Crypt4ghEncryptedArchive(CompressedArchive):
 
             if crypt4gh_compute_node_keypair_id:
                 dataset.metadata.crypt4gh_compute_node_keypair_id = crypt4gh_compute_node_keypair_id
+            else:
+                dataset.metadata.crypt4gh_compute_node_keypair_id = ""
 
-        except Exception as exc:
-            dataset.metadata.crypt4gh_header = None
-            dataset.metadata.crypt4gh_metadata_header_sha256 = None
-            dataset.metadata.crypt4gh_compute_node_keypair_id = None
+        except Exception:
+            dataset.metadata.crypt4gh_header = ""
+            dataset.metadata.crypt4gh_metadata_header_sha256 = ""
+            dataset.metadata.crypt4gh_dataset_header_sha256 = ""
+            dataset.metadata.crypt4gh_compute_node_keypair_id = ""
+            raise
 
-            log.warning("%s, set_meta Exception: %s", self, exc)
+    def _read_and_validate_crypt4gh_header(self, stream) -> bytes:
+        header = b''
+
+        prefix_bytes = stream.read(16)
+        if prefix_bytes[0:12] != self.CRYPT4GH_MAGIC_NUMBER_AND_VERSION:
+            raise ValueError('Unable to read Crypt4GH header. Not a Crypt4GH dataset')
+        header += prefix_bytes
+
+        header_packet_count = int.from_bytes(prefix_bytes[12:16], byteorder='little')
+        for i in range(header_packet_count):
+            packet_length = int.from_bytes(stream.read(4), byteorder='little')
+            stream.seek(-4, os.SEEK_CUR)
+            packet_bytes = stream.read(packet_length)
+            header += packet_bytes
+
+        return header
+
+    @staticmethod
+    def _has_encrypted_data(header: bytes, file_size: int):
+        return len(header) < file_size
 
 
 class GenericAsn1Binary(Binary):
