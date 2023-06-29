@@ -455,7 +455,18 @@ class Crypt4ghEncryptedArchive(Binary):
         readonly=True,
         visible=False,
         optional=False,
-        no_value=None,
+        no_value="",
+    )
+
+    MetadataElement(
+        name="crypt4gh_dataset_header_sha256",
+        default=None,
+        desc="SHA-256 checksum of the header as stored in the beginning of the dataset file itself.",
+        param=MetadataParameter,
+        readonly=True,
+        visible=True,
+        optional=False,
+        no_value="",
     )
 
     MetadataElement(
@@ -467,30 +478,19 @@ class Crypt4ghEncryptedArchive(Binary):
         readonly=True,
         visible=True,
         optional=False,
-        no_value=None
+        no_value="",
     )
 
     MetadataElement(
         name="crypt4gh_compute_node_keypair_id",
         default=None,
-        desc="Unique identifier for the keypair that will be or has been used for decryption at "
-             "the compute node.",
+        desc="Unique identifier of the corresponding keypair at the compute node (retained for both analysis input and "
+             "output datasets).",
         param=MetadataParameter,
         readonly=True,
         visible=True,
-        optional=False,
-        no_value=None
-    )
-
-    MetadataElement(
-        name="crypt4gh_dataset_header_sha256",
-        default=None,
-        desc="SHA-256 checksum of the header as stored in the beginning of the dataset file itself.",
-        param=MetadataParameter,
-        readonly=True,
-        visible=True,
-        optional=False,
-        no_value=None
+        optional=True,
+        no_value="",
     )
 
     def set_peek(self, dataset: DatasetProtocol, **kwd) -> None:
