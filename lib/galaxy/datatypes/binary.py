@@ -531,6 +531,10 @@ class Crypt4ghEncryptedArchive(Binary):
             with open(dataset.file_name, 'rb') as f:
                 dataset_header = self._read_and_validate_crypt4gh_header(f)
 
+            has_crypt4gh_data = self._has_encrypted_data(dataset_header, dataset.get_size())
+            if not has_crypt4gh_data:
+                raise ValueError('File has Crypt4GH header but no encrypted data')
+
             if crypt4gh_header:
                 metadata_header_stream = io.BytesIO(crypt4gh_header)
                 metadata_header = self._read_and_validate_crypt4gh_header(metadata_header_stream)
