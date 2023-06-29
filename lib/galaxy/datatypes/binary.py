@@ -13,6 +13,7 @@ import subprocess
 import tarfile
 import tempfile
 import zipfile
+from datetime import datetime
 from json import dumps
 from typing import (
     Any,
@@ -493,6 +494,18 @@ class Crypt4ghEncryptedArchive(Binary):
         no_value="",
     )
 
+    MetadataElement(
+        name="crypt4gh_compute_node_keypair_expiration_date",
+        default=None,
+        desc="Date and time of expiration of the corresponding keypair at the compute node, in ISO 8610 format "
+             "(retained for both analysis input and output datasets).",
+        param=MetadataParameter,
+        readonly=True,
+        visible=True,
+        optional=True,
+        no_value="",
+    )
+
     def set_peek(self, dataset: DatasetProtocol, **kwd) -> None:
         if not dataset.dataset.purged:
             dataset.peek = "Crypt4GH encrypted dataset"
@@ -522,7 +535,8 @@ class Crypt4ghEncryptedArchive(Binary):
 
     def set_meta(self, dataset: DatasetProtocol, overwrite: bool = True,
                  crypt4gh_header: Optional[bytes] = None,
-                 crypt4gh_compute_node_keypair_id: Optional[str] = None, **kwd) -> None:
+                 crypt4gh_compute_node_keypair_id: Optional[str] = None,
+                 crypt4gh_compute_node_keypair_expiration_date: Optional[datetime] = None, **kwd) -> None:
         super().set_meta(dataset=dataset, overwrite=overwrite, **kwd)
 
         try:
@@ -553,11 +567,18 @@ class Crypt4ghEncryptedArchive(Binary):
             else:
                 dataset.metadata.crypt4gh_compute_node_keypair_id = ""
 
+            if crypt4gh_compute_node_keypair_expiration_date:
+                dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = \
+                    crypt4gh_compute_node_keypair_expiration_date.isoformat()
+            else:
+                dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = ""
+
         except Exception:
             dataset.metadata.crypt4gh_header = ""
             dataset.metadata.crypt4gh_metadata_header_sha256 = ""
             dataset.metadata.crypt4gh_dataset_header_sha256 = ""
             dataset.metadata.crypt4gh_compute_node_keypair_id = ""
+            dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = ""
             raise
 
     def _read_and_validate_crypt4gh_header(self, stream) -> bytes:

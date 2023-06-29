@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from datetime import datetime
 
 import pytest
 from typing import NamedTuple, Optional, Generator
@@ -95,6 +96,7 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
             assert dataset.metadata.crypt4gh_metadata_header_sha256 == ORIG_HEADER_SHA256
             assert dataset.metadata.crypt4gh_dataset_header_sha256 == ORIG_HEADER_SHA256
             assert not dataset.metadata.crypt4gh_compute_node_keypair_id
+            assert not data_complete.dataset.metadata.crypt4gh_compute_node_keypair_expiration_date
 
         with c4gh_data_header_recrypted as data_header_recrypted:
             c4gh_loader.set_meta(dataset=dataset, crypt4gh_header=data_header_recrypted.contents)
@@ -103,9 +105,14 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
             assert dataset.metadata.crypt4gh_metadata_header_sha256 == RECRYPTED_HEADER_SHA256
             assert dataset.metadata.crypt4gh_dataset_header_sha256 == ORIG_HEADER_SHA256
             assert not dataset.metadata.crypt4gh_compute_node_keypair_id
+            assert not data_complete.dataset.metadata.crypt4gh_compute_node_keypair_expiration_date
 
         c4gh_loader.set_meta(dataset=dataset, crypt4gh_compute_node_keypair_id='cn_keypair_id_123')
         assert dataset.metadata.crypt4gh_compute_node_keypair_id == 'cn_keypair_id_123'
+
+        date = datetime(2023, 6, 30, 12, 15)
+        c4gh_loader.set_meta(dataset=dataset, crypt4gh_compute_node_keypair_expiration_date=date)
+        assert dataset.metadata.crypt4gh_compute_node_keypair_expiration_date == '2023-06-30T12:15:00'
 
 
 def test_crypt4gh_set_meta_not_crypt4gh_data(c4gh_loader, c4gh_data_payload, c4gh_data_header):
@@ -128,6 +135,7 @@ def test_crypt4gh_set_meta_with_bad_recrypt_header(c4gh_loader, c4gh_data_comple
         assert data_complete.dataset.metadata.crypt4gh_metadata_header_sha256
         assert data_complete.dataset.metadata.crypt4gh_dataset_header_sha256
         assert not data_complete.dataset.metadata.crypt4gh_compute_node_keypair_id
+        assert not data_complete.dataset.metadata.crypt4gh_compute_node_keypair_expiration_date
 
         with c4gh_data_payload as data_payload:
             with pytest.raises(ValueError):
@@ -141,3 +149,5 @@ def _assert_c4gh_metadata_not_set(dataset: DatasetProtocol):
     assert not dataset.metadata.crypt4gh_metadata_header_sha256
     assert not dataset.metadata.crypt4gh_dataset_header_sha256
     assert not dataset.metadata.crypt4gh_compute_node_keypair_id
+    assert not dataset.metadata.crypt4gh_compute_node_keypair_id
+    assert not dataset.metadata.crypt4gh_compute_node_keypair_expiration_date
