@@ -65,6 +65,7 @@
                     <span class="fa fa-question" />
                 </b-button>
                 <b-button
+                    v-if="showRecrypt"
                     class="px-1"
                     title="Recrypt Crypt4GH-encrypted dataset"
                     size="sm"
@@ -105,6 +106,15 @@ export default {
         },
         showInfo() {
             return this.item.state != "noPermission";
+        },
+        showRecrypt() {
+            return (
+                this.item.extension == "c4gh" &&
+                this.item.state != "error" &&
+                this.item.state != "failed_metadata" &&
+                this.item.state != "upload" &&
+                this.item.state != "noPermission"
+            );
         },
         showRerun() {
             return (
@@ -173,7 +183,7 @@ export default {
                         dbkey: this.item.dbkey,
                         "files_0|type": "upload_dataset",
                         "files_0|to_posix_lines": false,
-                        "files_0|NAME": `Re-encrypted Crypt4GH header of data ${this.item.hid}`,
+                        "files_0|NAME": `Crypt4GH re-encryption of data ${this.item.hid}`,
                         "files_0|url_paste": reencrypt_response.data,
                     },
                 };
