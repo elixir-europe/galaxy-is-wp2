@@ -66,10 +66,10 @@
                 </b-button>
                 <b-button
                     class="px-1"
-                    title="Re-encrypt Crypt4GH header"
+                    title="Recrypt Crypt4GH-encrypted dataset"
                     size="sm"
                     variant="link"
-                    @click.stop="onReEncrypt">
+                    @click.stop="onRecrypt">
                     <span class="fas fa-key" />
                 </b-button>
             </div>
@@ -155,7 +155,7 @@ export default {
         onHighlight() {
             this.$emit("toggleHighlights");
         },
-        async onReEncrypt() {
+        async onRecrypt() {
             try {
                 let data_response = await axios.get(
                     `${getAppRoot()}api/datasets/${this.item.id}/display?preview=false`
