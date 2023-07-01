@@ -1,6 +1,7 @@
 from base64 import b64encode
 from contextlib import contextmanager
 from datetime import datetime
+from textwrap import dedent
 
 import pytest
 from typing import NamedTuple, Optional, Generator
@@ -112,16 +113,54 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
         assert dataset.metadata.crypt4gh_metadata_header_sha256 == RECRYPTED_HEADER_SHA256
 
 
+def test_crypt4gh_compute_keypair_set_meta_and_peek(c4gh_loader, c4gh_data_complete, c4gh_data_header_recrypted):
+    with c4gh_data_complete as data_complete:
+        dataset = data_complete.dataset
+
+        # Dataset representing job output
+        # Retains info about compute keypair used for decryption to allow mapping to
+        # job-specific private key on the user side
+
         date = datetime(2023, 6, 30, 12, 15)
         c4gh_loader.set_meta(dataset=dataset,
-                             crypt4gh_compute_keypair_id='cn_keypair_id_123',
+                             crypt4gh_compute_keypair_id='cn:b38ac81f',
                              crypt4gh_compute_keypair_expiration_date=date)
-        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn_keypair_id_123'
+        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn:b38ac81f'
         assert dataset.metadata.crypt4gh_compute_keypair_expiration_date == '2023-06-30T12:15:00'
 
         c4gh_loader.set_meta(dataset=dataset)
-        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn_keypair_id_123'
+        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn:b38ac81f'
         assert dataset.metadata.crypt4gh_compute_keypair_expiration_date == '2023-06-30T12:15:00'
+
+        c4gh_loader.set_peek(dataset)
+        assert dataset.peek == dedent("""\
+            Crypt4GH encrypted dataset
+            Encrypted to allow de/recryption by user
+            Compute keypair id: cn:b38ac81f
+            Compute keypair expires: 2023-06-30T12:15:00""")
+        assert dataset.blurb == "2.8 KB"
+
+        # Dataset is recrypted for another analysis job with new compute keypair
+
+        date = datetime(2023, 6, 30, 13, 4)
+        with c4gh_data_header_recrypted as data_header_recrypted:
+            c4gh_loader.set_meta(dataset=dataset,
+                                 crypt4gh_header=data_header_recrypted.contents,
+                                 crypt4gh_compute_keypair_id='cn:148fa23c7',
+                                 crypt4gh_compute_keypair_expiration_date=date)
+            assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn:148fa23c7'
+            assert dataset.metadata.crypt4gh_compute_keypair_expiration_date == '2023-06-30T13:04:00'
+
+        c4gh_loader.set_peek(dataset)
+        assert dataset.peek == dedent("""\
+            Crypt4GH encrypted dataset
+            Recrypted to allow decryption at compute node
+            Metadata header overrides header in dataset
+            Compute keypair id: cn:148fa23c7
+            Compute keypair expires: 2023-06-30T13:04:00""")
+
+        assert dataset.blurb == "2.8 KB"
+
 
 
 def test_crypt4gh_set_meta_not_crypt4gh_data(c4gh_loader, c4gh_data_payload, c4gh_data_header):

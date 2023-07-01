@@ -510,7 +510,23 @@ class Crypt4ghEncryptedArchive(Binary):
 
     def set_peek(self, dataset: DatasetProtocol, **kwd) -> None:
         if not dataset.dataset.purged:
-            dataset.peek = "Crypt4GH encrypted dataset"
+            peek_lines = ["Crypt4GH encrypted dataset"]
+            keypair_id = getattr(dataset.metadata, "crypt4gh_compute_keypair_id", None)
+
+            if self._is_recrypted(dataset):
+                peek_lines.append("Recrypted to allow decryption at compute node")
+                peek_lines.append("Metadata header overrides header in dataset")
+            elif keypair_id:
+                peek_lines.append("Encrypted to allow de/recryption by user")
+
+            if keypair_id:
+                peek_lines.append(f"Compute keypair id: {keypair_id}")
+
+            keypair_exp_date = getattr(dataset.metadata, "crypt4gh_compute_keypair_expiration_date", None)
+            if keypair_exp_date:
+                peek_lines.append(f"Compute keypair expires: {keypair_exp_date}")
+
+            dataset.peek = os.linesep.join(peek_lines)
             dataset.blurb = nice_size(dataset.get_size())
         else:
             dataset.peek = "file does not exist"
@@ -609,6 +625,12 @@ class Crypt4ghEncryptedArchive(Binary):
     @staticmethod
     def _has_encrypted_data(header: bytes, file_size: int):
         return len(header) < file_size
+
+    @staticmethod
+    def _is_recrypted(dataset: DatasetProtocol):
+        metadata_header_sha256 = getattr(dataset.metadata, "crypt4gh_metadata_header_sha256", None)
+        dataset_header_sha256 = getattr(dataset.metadata, "crypt4gh_dataset_header_sha256", None)
+        return metadata_header_sha256 and dataset_header_sha256 and metadata_header_sha256 != dataset_header_sha256
 
 
 class GenericAsn1Binary(Binary):
