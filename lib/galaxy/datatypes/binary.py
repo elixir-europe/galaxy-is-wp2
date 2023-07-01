@@ -551,9 +551,13 @@ class Crypt4ghEncryptedArchive(Binary):
             if not has_crypt4gh_data:
                 raise ValueError('File has Crypt4GH header but no encrypted data')
 
+            prev_metadata_header = getattr(dataset.metadata, "crypt4gh_header", None)
+
             if crypt4gh_header:
                 metadata_header_stream = io.BytesIO(crypt4gh_header)
                 metadata_header = self._read_and_validate_crypt4gh_header(metadata_header_stream)
+            elif prev_metadata_header:
+                metadata_header = b64decode(prev_metadata_header)
             else:
                 metadata_header = dataset_header
 
@@ -567,13 +571,15 @@ class Crypt4ghEncryptedArchive(Binary):
             if crypt4gh_compute_keypair_id:
                 dataset.metadata.crypt4gh_compute_keypair_id = crypt4gh_compute_keypair_id
             else:
-                dataset.metadata.crypt4gh_compute_keypair_id = ""
+                prev_keypair_id = getattr(dataset.metadata, "crypt4gh_compute_keypair_id", None)
+                dataset.metadata.crypt4gh_compute_keypair_id = prev_keypair_id if prev_keypair_id else ""
 
             if crypt4gh_compute_keypair_expiration_date:
                 dataset.metadata.crypt4gh_compute_keypair_expiration_date = \
                     crypt4gh_compute_keypair_expiration_date.isoformat()
             else:
-                dataset.metadata.crypt4gh_compute_keypair_expiration_date = ""
+                prev_exp_date = getattr(dataset.metadata, "crypt4gh_compute_keypair_expiration_date", None)
+                dataset.metadata.crypt4gh_compute_keypair_expiration_date = prev_exp_date if prev_exp_date else ""
 
         except Exception:
             dataset.metadata.crypt4gh_header = ""

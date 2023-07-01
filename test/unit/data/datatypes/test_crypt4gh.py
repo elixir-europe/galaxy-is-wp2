@@ -108,11 +108,19 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
             assert dataset.metadata.crypt4gh_compute_keypair_id == ""
             assert data_complete.dataset.metadata.crypt4gh_compute_keypair_expiration_date == ""
 
-        c4gh_loader.set_meta(dataset=dataset, crypt4gh_compute_keypair_id='cn_keypair_id_123')
-        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn_keypair_id_123'
+        c4gh_loader.set_meta(dataset=dataset)
+        assert dataset.metadata.crypt4gh_metadata_header_sha256 == RECRYPTED_HEADER_SHA256
+
 
         date = datetime(2023, 6, 30, 12, 15)
-        c4gh_loader.set_meta(dataset=dataset, crypt4gh_compute_keypair_expiration_date=date)
+        c4gh_loader.set_meta(dataset=dataset,
+                             crypt4gh_compute_keypair_id='cn_keypair_id_123',
+                             crypt4gh_compute_keypair_expiration_date=date)
+        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn_keypair_id_123'
+        assert dataset.metadata.crypt4gh_compute_keypair_expiration_date == '2023-06-30T12:15:00'
+
+        c4gh_loader.set_meta(dataset=dataset)
+        assert dataset.metadata.crypt4gh_compute_keypair_id == 'cn_keypair_id_123'
         assert dataset.metadata.crypt4gh_compute_keypair_expiration_date == '2023-06-30T12:15:00'
 
 
