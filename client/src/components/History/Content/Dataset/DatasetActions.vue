@@ -79,12 +79,14 @@
 </template>
 
 <script>
+import { getGalaxyInstance } from "app";
 import axios from "axios";
 import { copy as sendToClipboard } from "utils/clipboard";
 import { absPath, prependPath } from "@/utils/redirect";
 import { downloadUrlMixin } from "./mixins.js";
 import DatasetDownload from "./DatasetDownload";
 import { getAppRoot } from "@/onload/loadConfig";
+import {setAttributes} from "@/components/DatasetInformation/services";
 
 export default {
     components: {
@@ -167,32 +169,30 @@ export default {
         },
         async onRecrypt() {
             try {
-                let data_response = await axios.get(
-                    `${getAppRoot()}api/datasets/${this.item.id}/display?preview=false`
-                );
-                let reencrypt_response = await axios.post("https://localhost:61357/reencrypt_header", {
-                    encrypted_header: data_response.data,
-                    reencrypt_public_key: "Compute public key",
+                let recryptResponse = await axios.post("https://localhost:61357/recrypt_header", {
+                    crypt4gh_header: this.item.metadata_crypt4gh_header,
                 });
 
-                let payload = {
-                    history_id: this.item.history_id,
-                    tool_id: "upload1",
-                    inputs: {
-                        file_type: this.item.file_type,
-                        dbkey: this.item.dbkey,
-                        "files_0|type": "upload_dataset",
-                        "files_0|to_posix_lines": false,
-                        "files_0|NAME": `Crypt4GH re-encryption of data ${this.item.hid}`,
-                        "files_0|url_paste": reencrypt_response.data,
-                    },
-                };
+                let copyHdaResponse = await axios.post(`${getAppRoot()}api/histories/${this.item.history_id}/contents/datasets`, {
+                    source: "hda",
+                    content: this.item.id,
+                })
 
-                let upload_response = await axios.post(`${getAppRoot()}api/tools/`, payload);
-                console.log(this.item);
-                // console.log(upload_response);
-            } catch (e) {
-                console.error(e.toJSON());
+                let editHdaResponse = await axios.put(`${getAppRoot()}api/histories/${this.item.history_id}/contents/datasets/${copyHdaResponse.data.id}`, {
+                    tags: ["Recrypted_for_compute", recryptResponse.data.crypt4gh_compute_keypair_id],
+                    metadata: {
+                      ...recryptResponse.data
+                    }
+                })
+
+                let datatypeDetectResponse = await setAttributes(copyHdaResponse.data.id, {}, "autodetect")
+
+                const Galaxy = getGalaxyInstance();
+                if (Galaxy) {
+                  Galaxy.currHistoryPanel.loadCurrentHistory();
+                }
+            } catch (err) {
+                console.error(JSON.stringify(err, Object.getOwnPropertyNames(err)));
             }
         },
     },
