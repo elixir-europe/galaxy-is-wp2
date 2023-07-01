@@ -475,8 +475,7 @@ class Crypt4ghEncryptedArchive(Binary):
     MetadataElement(
         name="crypt4gh_metadata_header_sha256",
         default="",
-        desc="SHA-256 checksum of the header as stored in the 'crypt4gh_header' metadata field. All updates of the "
-             "'crypt4gh_header' must also recalculate this SHA-256 checksum.",
+        desc="SHA-256 checksum of the header as stored in the 'crypt4gh_header' metadata field.",
         param=MetadataParameter,
         readonly=True,
         visible=True,
