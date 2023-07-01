@@ -449,13 +449,13 @@ class Crypt4ghEncryptedArchive(Binary):
 
     MetadataElement(
         name="crypt4gh_header",
-        default=None,
+        default="",
         desc="Header of a Crypt4GH-encrypted dataset, extracted from start of dataset, encoded with base64. "
              "The header in this metadata field should be used instead of the header in the beginning of "
              "the data file itself. This allows for modification of the header for e.g. recryption without "
              "having to change the dataset contents. ",
         param=MetadataParameter,
-        readonly=True,
+        readonly=False,
         visible=False,
         optional=False,
         no_value="",
@@ -463,7 +463,7 @@ class Crypt4ghEncryptedArchive(Binary):
 
     MetadataElement(
         name="crypt4gh_dataset_header_sha256",
-        default=None,
+        default="",
         desc="SHA-256 checksum of the header as stored in the beginning of the dataset file itself.",
         param=MetadataParameter,
         readonly=True,
@@ -474,7 +474,7 @@ class Crypt4ghEncryptedArchive(Binary):
 
     MetadataElement(
         name="crypt4gh_metadata_header_sha256",
-        default=None,
+        default="",
         desc="SHA-256 checksum of the header as stored in the 'crypt4gh_header' metadata field. All updates of the "
              "'crypt4gh_header' must also recalculate this SHA-256 checksum.",
         param=MetadataParameter,
@@ -485,25 +485,25 @@ class Crypt4ghEncryptedArchive(Binary):
     )
 
     MetadataElement(
-        name="crypt4gh_compute_node_keypair_id",
-        default=None,
+        name="crypt4gh_compute_keypair_id",
+        default="",
         desc="Unique identifier of the corresponding keypair at the compute node (retained for both analysis input and "
              "output datasets).",
         param=MetadataParameter,
-        readonly=True,
-        visible=True,
+        readonly=False,
+        visible=False,
         optional=True,
         no_value="",
     )
 
     MetadataElement(
-        name="crypt4gh_compute_node_keypair_expiration_date",
-        default=None,
+        name="crypt4gh_compute_keypair_expiration_date",
+        default="",
         desc="Date and time of expiration of the corresponding keypair at the compute node, in ISO 8610 format "
              "(retained for both analysis input and output datasets).",
         param=MetadataParameter,
-        readonly=True,
-        visible=True,
+        readonly=False,
+        visible=False,
         optional=True,
         no_value="",
     )
@@ -537,8 +537,8 @@ class Crypt4ghEncryptedArchive(Binary):
 
     def set_meta(self, dataset: DatasetProtocol, overwrite: bool = True,
                  crypt4gh_header: Optional[bytes] = None,
-                 crypt4gh_compute_node_keypair_id: Optional[str] = None,
-                 crypt4gh_compute_node_keypair_expiration_date: Optional[datetime] = None, **kwd) -> None:
+                 crypt4gh_compute_keypair_id: Optional[str] = None,
+                 crypt4gh_compute_keypair_expiration_date: Optional[datetime] = None, **kwd) -> None:
         super().set_meta(dataset=dataset, overwrite=overwrite, **kwd)
 
         try:
@@ -564,23 +564,23 @@ class Crypt4ghEncryptedArchive(Binary):
             dataset.metadata.crypt4gh_metadata_header_sha256 = sha256_metadata_header
             dataset.metadata.crypt4gh_dataset_header_sha256 = sha256_dataset_header
 
-            if crypt4gh_compute_node_keypair_id:
-                dataset.metadata.crypt4gh_compute_node_keypair_id = crypt4gh_compute_node_keypair_id
+            if crypt4gh_compute_keypair_id:
+                dataset.metadata.crypt4gh_compute_keypair_id = crypt4gh_compute_keypair_id
             else:
-                dataset.metadata.crypt4gh_compute_node_keypair_id = ""
+                dataset.metadata.crypt4gh_compute_keypair_id = ""
 
-            if crypt4gh_compute_node_keypair_expiration_date:
-                dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = \
-                    crypt4gh_compute_node_keypair_expiration_date.isoformat()
+            if crypt4gh_compute_keypair_expiration_date:
+                dataset.metadata.crypt4gh_compute_keypair_expiration_date = \
+                    crypt4gh_compute_keypair_expiration_date.isoformat()
             else:
-                dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = ""
+                dataset.metadata.crypt4gh_compute_keypair_expiration_date = ""
 
         except Exception:
             dataset.metadata.crypt4gh_header = ""
             dataset.metadata.crypt4gh_metadata_header_sha256 = ""
             dataset.metadata.crypt4gh_dataset_header_sha256 = ""
-            dataset.metadata.crypt4gh_compute_node_keypair_id = ""
-            dataset.metadata.crypt4gh_compute_node_keypair_expiration_date = ""
+            dataset.metadata.crypt4gh_compute_keypair_id = ""
+            dataset.metadata.crypt4gh_compute_keypair_expiration_date = ""
             raise
 
     def _read_and_validate_crypt4gh_header(self, stream) -> bytes:
