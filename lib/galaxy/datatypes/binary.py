@@ -560,12 +560,12 @@ class Crypt4ghEncryptedArchive(Binary):
         try:
             from galaxy.util.hash_util import sha256
 
-            with open(dataset.file_name, 'rb') as f:
+            with open(dataset.file_name, "rb") as f:
                 dataset_header = self._read_and_validate_crypt4gh_header(f)
 
             has_crypt4gh_data = self._has_encrypted_data(dataset_header, dataset.get_size())
             if not has_crypt4gh_data:
-                raise ValueError('File has Crypt4GH header but no encrypted data')
+                raise ValueError("File has Crypt4GH header but no encrypted data")
 
             prev_metadata_header = getattr(dataset.metadata, "crypt4gh_header", None)
 
@@ -606,16 +606,16 @@ class Crypt4ghEncryptedArchive(Binary):
             raise
 
     def _read_and_validate_crypt4gh_header(self, stream) -> bytes:
-        header = b''
+        header = b""
 
         prefix_bytes = stream.read(16)
         if prefix_bytes[0:12] != self.CRYPT4GH_MAGIC_NUMBER_AND_VERSION:
-            raise ValueError('Unable to read Crypt4GH header. Not a Crypt4GH dataset')
+            raise ValueError("Unable to read Crypt4GH header. Not a Crypt4GH dataset")
         header += prefix_bytes
 
-        header_packet_count = int.from_bytes(prefix_bytes[12:16], byteorder='little')
+        header_packet_count = int.from_bytes(prefix_bytes[12:16], byteorder="little")
         for i in range(header_packet_count):
-            packet_length = int.from_bytes(stream.read(4), byteorder='little')
+            packet_length = int.from_bytes(stream.read(4), byteorder="little")
             stream.seek(-4, os.SEEK_CUR)
             packet_bytes = stream.read(packet_length)
             header += packet_bytes

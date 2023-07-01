@@ -86,7 +86,6 @@ def test_crypt4gh_sniff_prefix(c4gh_loader, c4gh_data_complete, c4gh_data_header
         assert c4gh_loader.sniff_prefix(data_payload.file_prefix) is False
 
 
-
 def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4gh_data_header_recrypted):
     with c4gh_data_complete as data_complete:
         dataset = data_complete.dataset
