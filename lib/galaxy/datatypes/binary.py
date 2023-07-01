@@ -13,6 +13,7 @@ import subprocess
 import tarfile
 import tempfile
 import zipfile
+from base64 import b64encode, b64decode
 from datetime import datetime
 from json import dumps
 from typing import (
@@ -449,9 +450,10 @@ class Crypt4ghEncryptedArchive(Binary):
     MetadataElement(
         name="crypt4gh_header",
         default=None,
-        desc="Header of a Crypt4GH-encrypted dataset, extracted from start of dataset. The header in this metadata "
-             "field should be used instead of the header in the beginning of the data file itself. This allows for "
-             "modification of the header for e.g. re-encryption without having to change the dataset contents. ",
+        desc="Header of a Crypt4GH-encrypted dataset, extracted from start of dataset, encoded with base64. "
+             "The header in this metadata field should be used instead of the header in the beginning of "
+             "the data file itself. This allows for modification of the header for e.g. recryption without "
+             "having to change the dataset contents. ",
         param=MetadataParameter,
         readonly=True,
         visible=False,
@@ -558,7 +560,7 @@ class Crypt4ghEncryptedArchive(Binary):
             sha256_dataset_header = sha256(dataset_header).hexdigest()
             sha256_metadata_header = sha256(metadata_header).hexdigest()
 
-            dataset.metadata.crypt4gh_header = metadata_header
+            dataset.metadata.crypt4gh_header = b64encode(metadata_header)
             dataset.metadata.crypt4gh_metadata_header_sha256 = sha256_metadata_header
             dataset.metadata.crypt4gh_dataset_header_sha256 = sha256_dataset_header
 

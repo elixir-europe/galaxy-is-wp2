@@ -1,3 +1,4 @@
+from base64 import b64encode
 from contextlib import contextmanager
 from datetime import datetime
 
@@ -92,7 +93,7 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
         with c4gh_data_header as data_header:
             c4gh_loader.set_meta(dataset=dataset)
 
-            assert dataset.metadata.crypt4gh_header == data_header.contents
+            assert dataset.metadata.crypt4gh_header == b64encode(data_header.contents)
             assert dataset.metadata.crypt4gh_metadata_header_sha256 == ORIG_HEADER_SHA256
             assert dataset.metadata.crypt4gh_dataset_header_sha256 == ORIG_HEADER_SHA256
             assert not dataset.metadata.crypt4gh_compute_node_keypair_id
@@ -101,7 +102,7 @@ def test_crypt4gh_set_meta(c4gh_loader, c4gh_data_complete, c4gh_data_header, c4
         with c4gh_data_header_recrypted as data_header_recrypted:
             c4gh_loader.set_meta(dataset=dataset, crypt4gh_header=data_header_recrypted.contents)
 
-            assert dataset.metadata.crypt4gh_header == data_header_recrypted.contents
+            assert dataset.metadata.crypt4gh_header == b64encode(data_header_recrypted.contents)
             assert dataset.metadata.crypt4gh_metadata_header_sha256 == RECRYPTED_HEADER_SHA256
             assert dataset.metadata.crypt4gh_dataset_header_sha256 == ORIG_HEADER_SHA256
             assert not dataset.metadata.crypt4gh_compute_node_keypair_id
