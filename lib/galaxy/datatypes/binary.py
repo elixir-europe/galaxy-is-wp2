@@ -596,6 +596,15 @@ class Crypt4ghEncryptedArchive(Binary):
                 prev_exp_date = getattr(dataset.metadata, "crypt4gh_compute_keypair_expiration_date", None)
                 dataset.metadata.crypt4gh_compute_keypair_expiration_date = prev_exp_date if prev_exp_date else ""
 
+            if bool(dataset.metadata.crypt4gh_compute_keypair_id) \
+                    ^ bool(dataset.metadata.crypt4gh_compute_keypair_expiration_date):
+                raise ValueError(
+                    f"Metadata fields 'crypt4gh_compute_keypair_id' "
+                    f"({dataset.metadata.crypt4gh_compute_keypair_id}) and "
+                    f"'crypt4gh_compute_keypair_expiration_date' "
+                    f"({dataset.metadata.crypt4gh_compute_keypair_expiration_date}) "
+                    "must be provided together.")
+
         except Exception:
             dataset.metadata.crypt4gh_header = ""
             dataset.metadata.crypt4gh_metadata_header_sha256 = ""
